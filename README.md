@@ -17,8 +17,6 @@ Contents:
 - A Stripe **test** account (or live account) with **API keys**.  
 - An HTTPS environment is **highly recommended**, especially if you go live (Stripe enforces HTTPS for live payments).
 
----
-
 ## 2. Configuration
 
 ### 2.1. Stripe API Keys
@@ -65,8 +63,6 @@ You’ll see a basic form with a card field and a **“Pay”** button.
 3. If all is configured correctly, Stripe will process the payment.  
    You should see an alert saying **“Payment succeeded!”** in test mode.
 
----
-
 ## 4. Explanation of How It Works
 
 - `index.html` loads **Stripe.js** and creates a **Card Element**.
@@ -86,8 +82,6 @@ You’ll see a basic form with a card field and a **“Pay”** button.
 	- If **3D Secure / SCA** is required, **Stripe.js** prompts the user to authenticate.
 	- If successful, you see **“Payment succeeded!”**.
 
----
-
 ## 5. Handling 3D Secure (SCA)
 
 Stripe automatically triggers 3D Secure when required.
@@ -96,15 +90,11 @@ Stripe automatically triggers 3D Secure when required.
 - You can make a second call to `stripe.confirmCardPayment(...)` without parameters to prompt the user to complete 3D Secure.
 - If the user completes it successfully, the `PaymentIntent` moves to `succeeded`.
 
----
-
 ## 6. Troubleshooting
 
 - **No such payment_intent**: Commonly caused by mixing test/live keys, using an expired `client_secret`, or a mismatch in keys.
 - **Card errors (insufficient funds, etc.)**: Display `error.message` from Stripe.js to the user.
 - **Network errors**: If cURL fails or Stripe is unreachable, the script returns a generic error.
-
----
 
 ## 7. Going Live
 
