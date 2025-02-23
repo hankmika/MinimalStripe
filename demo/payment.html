@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Stripe Card Payment</title>
+	<style type="text/css">
+		body {
+			padding: 2em;
+		}
+
+		#card_element {
+			border: 1px solid #000;
+			padding: 0.4em;
+			margin: 1em 0;
+		}
+
+		.wrapper {
+			margin: 0 auto;
+			max-width: 300px;
+		}
+	</style>
+</head>
+<body>
+
+<div class="wrapper">
+	<!-- Payment Form -->
+	<form id="payment_form">
+		<!-- Stripe.js will inject the card fields into this container -->
+		<div id="card_element"></div>
+		<button id="submit-button" type="submit">Pay</button>
+	</form>
+
+	<!-- A container to show error messages to the user -->
+	<div id="error_message"></div>
+</div>
+
+<!-- Load Stripe.js -->
+<script src="https://js.stripe.com/v3"></script>
+<script>
+	// Replace with your own Stripe publishable key
+	const stripe = Stripe('pk_test_51QvAw9PTICtyVfnwfGbXMdpRg8qN9hp4uLmUVC007XHWeX1QGnb4b1OtpJ5xglKz1VnJ9YqdfEuwKexUAOekj4p2005VAZAWVT');
+	const elements = stripe.elements();
+	
+	const cardElement = elements.create('card');
+	cardElement.mount('#card_element');
+
+	const paymentForm = document.getElementById('payment_form');
+	const errorMessage = document.getElementById('error_message');
+
+	paymentForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		errorMessage.textContent = '';
+
+		try {
+			// 1. Fetch PaymentIntent from the server
+			//    This endpoint creates a PaymentIntent with your MinimalStripe class
+			const response = await fetch('./create_payment_intent.php', {
+				method: 'POST'
+			});
+			const data = await response.json();
+
+			if (data.error) {
+				errorMessage.textContent = data.error;
+				return;
+			}
+
+			// 2. Confirm payment with the card details
+			let { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+				payment_method: {
+					card: cardElement
+				}
+			});
+
+			if (error) {
+				// This handles card or other immediate payment errors
+				errorMessage.textContent = error.message;
+				return;
+			}
+
+			// 3. Check if further 3D Secure authentication is required
+			if (paymentIntent && paymentIntent.status === 'requires_action') {
+				// The user must authenticate via 3D Secure
+				const nextActionResult = await stripe.confirmCardPayment(data.clientSecret);
+				if (nextActionResult.error) {
+					// Show authentication error
+					errorMessage.textContent = nextActionResult.error.message;
+					return;
+				} else if (nextActionResult.paymentIntent.status === 'succeeded') {
+					alert('Payment succeeded with 3D Secure!');
+				}
+			} else if (paymentIntent.status === 'succeeded') {
+				// Payment complete
+				alert('Payment succeeded!');
+			}
+		} catch (err) {
+			errorMessage.textContent = 'An error occurred: ' + err.message;
+		}
+	});
+</script>
+
+</body>
+</html>

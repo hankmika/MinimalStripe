@@ -1,0 +1,2 @@
+<?php
+$stripeApiKey = 'sk_test_51QvAw9PTICtyVfnwSzTx4bJnYa9mCCrYHhYTPvZByVZtmn02QzCCc1U4HxHDB8coNggD8p0T5n86oz8iv8XEDPZ500WWvRxjeR';
